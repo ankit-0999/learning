@@ -1,0 +1,21 @@
+{
+  "name": "e-learning-platform",
+  "version": "1.0.0",
+  "description": "E-Learning Platform with Next.js frontend and Express backend",
+  "main": "index.js",
+  "scripts": {
+    "client": "cd client && npm run dev",
+    "server": "cd server && npm run dev",
+    "dev": "npm run server & npm run client",
+    "seed": "cd server && npm run seed",
+    "start": "cd server && npm run start"
+  },
+  "keywords": [
+    "e-learning",
+    "nextjs",
+    "expressjs",
+    "mongodb"
+  ],
+  "author": "",
+  "license": "ISC"
+} 
