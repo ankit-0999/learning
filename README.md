@@ -50,13 +50,13 @@ The system comes with pre-configured user accounts for testing:
 - **Access**: Full administrative access to all platform features
 
 ### Faculty User
-- **Email**: faculty@example.com
-- **Password**: faculty123 (or password123 depending on which seed script runs)
+- **Email**: ankit@example.com
+- **Password**: ankit123 (or password123 depending on which seed script runs)
 - **Access**: Course creation, assignment management, grading
 
 ### Student User
-- **Email**: student@example.com
-- **Password**: student123
+- **Email**: ravi@gmail.com
+- **Password**: ravi123
 - **Access**: Course enrollment, assignment submission, quiz taking
 
 ## Accessing the Admin Dashboard
@@ -115,6 +115,7 @@ npm install
 
 # Create .env file with the following content:
 # PORT=5000
+# pls connect your own mongoDb sever
 # MONGO_URI=mongodb://127.0.0.1:27017/elearning
 # JWT_SECRET=elearningplatformsecretkey2023
 # JWT_REFRESH_SECRET=elearning_refresh_secret_key_2023
