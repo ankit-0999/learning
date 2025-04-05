@@ -50,7 +50,12 @@ export default function UsersPage() {
       setIsLoading(true);
       try {
         const response = await apiService.admin.getUsers();
-        setUsers(response.data.data);
+        // Map _id to id for consistency with the interface
+        const mappedUsers = response.data.data.map((user: any) => ({
+          ...user,
+          id: user._id || user.id // Use existing id if available, otherwise use _id
+        }));
+        setUsers(mappedUsers);
       } catch (error) {
         console.error('Error fetching users:', error);
         toast.error('Failed to load users');
@@ -134,20 +139,29 @@ export default function UsersPage() {
       if (currentUser) {
         // Edit existing user
         const { password, ...updateData } = formData;
-        await apiService.admin.updateUser(currentUser.id, updateData);
+        const response = await apiService.admin.updateUser(currentUser.id, updateData);
+        const updatedUser = {
+          ...response.data.data,
+          id: response.data.data._id || response.data.data.id
+        };
         
         // Update local state
         setUsers(users.map(user => 
-          user.id === currentUser.id ? { ...user, ...updateData } : user
+          user.id === currentUser.id ? updatedUser : user
         ));
         
         toast.success('User updated successfully');
       } else {
         // Create new user
         const response = await apiService.admin.createUser(formData);
+        // Add mapped id to the new user
+        const newUser = {
+          ...response.data.data,
+          id: response.data.data._id || response.data.data.id
+        };
         
         // Add to local state
-        setUsers([...users, response.data.data]);
+        setUsers([...users, newUser]);
         
         toast.success('User created successfully');
       }

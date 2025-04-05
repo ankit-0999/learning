@@ -247,16 +247,49 @@ exports.getCourseLectures = async (req, res, next) => {
  */
 exports.getAssignments = async (req, res, next) => {
   try {
+    console.log("Student assignments request from:", req.user._id);
+    
     // Get user's enrolled courses
     const user = await User.findById(req.user._id).select('enrolledCourses');
+    console.log("Student enrolled courses:", user.enrolledCourses);
+
+    // Check if any assignments exist at all
+    const allAssignments = await Assignment.countDocuments();
+    console.log("Total assignments in database:", allAssignments);
+    
+    // Check if any assignments exist for this course regardless of published status
+    const allCourseAssignments = await Assignment.find({
+      course: { $in: user.enrolledCourses }
+    });
+    console.log("All assignments for student's courses (including unpublished):", allCourseAssignments.length);
+    
+    if (allCourseAssignments.length > 0) {
+      console.log("Sample course assignment:", {
+        id: allCourseAssignments[0]._id,
+        title: allCourseAssignments[0].title,
+        isPublished: allCourseAssignments[0].isPublished,
+        course: allCourseAssignments[0].course
+      });
+    }
 
     // Find assignments for enrolled courses
     const assignments = await Assignment.find({
       course: { $in: user.enrolledCourses },
       isPublished: true,
     })
-      .populate('course', 'title')
+      .populate('course', 'title code')
+      .populate('createdBy', 'name email role')
       .select('-submissions.attachments');
+    
+    console.log("Found published assignments count:", assignments.length);
+    if (assignments.length > 0) {
+      console.log("Sample assignment:", {
+        id: assignments[0]._id,
+        title: assignments[0].title,
+        course: assignments[0].course.title,
+        createdBy: assignments[0].createdBy
+      });
+    }
 
     // For each assignment, add submission status for current student
     const assignmentsWithStatus = assignments.map(assignment => {
@@ -266,7 +299,10 @@ exports.getAssignments = async (req, res, next) => {
 
       return {
         ...assignment.toObject(),
-        submissions: undefined, // Remove all submissions
+        submissions: assignment.submissions.map(sub => ({
+          ...sub,
+          student: sub.student.toString() === req.user._id.toString() ? sub.student : undefined
+        })), // Keep submissions but anonymize other students
         studentSubmission: studentSubmission || null,
       };
     });
@@ -277,6 +313,7 @@ exports.getAssignments = async (req, res, next) => {
       data: assignmentsWithStatus,
     });
   } catch (error) {
+    console.error("Error in getAssignments:", error);
     next(error);
   }
 };

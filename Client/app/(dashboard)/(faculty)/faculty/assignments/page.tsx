@@ -221,6 +221,27 @@ export default function FacultyAssignmentsPage() {
     setIsModalOpen(true);
   };
 
+  // Function to publish an assignment
+  const publishAssignment = async (assignment: Assignment) => {
+    try {
+      await apiService.faculty.publishAssignment(assignment._id);
+      showToast({
+        title: 'Success',
+        message: 'Assignment published successfully!',
+        type: 'success'
+      });
+      // Refresh assignments list
+      await refreshAssignments();
+    } catch (error) {
+      console.error('Error publishing assignment:', error);
+      showToast({
+        title: 'Error',
+        message: 'Failed to publish assignment',
+        type: 'error'
+      });
+    }
+  };
+
   const handleEditAssignment = (assignment: Assignment) => {
     setFormData({
       title: assignment.title,
@@ -450,6 +471,22 @@ export default function FacultyAssignmentsPage() {
         </div>
       </div>
 
+      {/* Informational alert about publishing assignments */}
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 flex items-start">
+        <div className="flex-shrink-0 mt-0.5">
+          <svg className="h-5 w-5 text-blue-600 dark:text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+          </svg>
+        </div>
+        <div className="ml-3 flex-1">
+          <h3 className="text-sm font-medium text-blue-800 dark:text-blue-300">Assignment Visibility</h3>
+          <div className="mt-1 text-sm text-blue-700 dark:text-blue-400">
+            <p>Students can only see <strong>published assignments</strong>. Remember to publish assignments after creating them!</p>
+            <p className="mt-1">Toggle to <strong>"View Drafts"</strong> to see and publish your unpublished assignments.</p>
+          </div>
+        </div>
+      </div>
+
       {filteredAssignments.length === 0 ? (
         <div className="text-center py-12">
           <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400" />
@@ -482,6 +519,16 @@ export default function FacultyAssignmentsPage() {
                       </p>
                     </div>
                     <div className="flex space-x-2">
+                      {/* Add Publish button for draft assignments */}
+                      {!assignment.isPublished && (
+                        <button
+                          onClick={() => publishAssignment(assignment)}
+                          className="text-green-600 hover:text-green-800 dark:hover:text-green-400"
+                          title="Publish Assignment"
+                        >
+                          <CheckCircleIcon className="h-5 w-5" />
+                        </button>
+                      )}
                       <button
                         onClick={() => handleEditAssignment(assignment)}
                         className="text-blue-600 hover:text-blue-800 dark:hover:text-blue-400"
@@ -564,6 +611,23 @@ export default function FacultyAssignmentsPage() {
                     </div>
                   )}
                 </div>
+                
+                {!assignment.isPublished && (
+                  <div className="bg-yellow-50 dark:bg-yellow-900/20 p-6 flex flex-col justify-center items-center border-t md:border-t-0 md:border-l border-yellow-200 dark:border-yellow-800 min-w-[200px]">
+                    <div className="text-center mb-4">
+                      <p className="text-sm text-yellow-700 dark:text-yellow-400">Draft Status</p>
+                      <p className="text-sm text-yellow-600 dark:text-yellow-300 mt-1">Students cannot see this assignment</p>
+                    </div>
+                    
+                    <button 
+                      onClick={() => publishAssignment(assignment)}
+                      className="w-full text-center text-sm px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md transition flex items-center justify-center gap-2"
+                    >
+                      <CheckCircleIcon className="h-4 w-4" />
+                      Publish Assignment
+                    </button>
+                  </div>
+                )}
                 
                 {assignment.isPublished && (
                   <div className="bg-gray-50 dark:bg-gray-800 p-6 flex flex-col justify-center items-center border-t md:border-t-0 md:border-l border-gray-200 dark:border-gray-700 min-w-[200px]">

@@ -326,7 +326,7 @@ exports.getFacultyAssignments = async (req, res, next) => {
  */
 exports.createAssignment = async (req, res, next) => {
   try {
-    const { title, description, course, dueDate, totalMarks } = req.body;
+    const { title, description, course, dueDate, totalMarks, isPublished } = req.body;
 
     // Verify the course exists and faculty is the instructor
     const courseExists = await Course.findById(course);
@@ -354,6 +354,7 @@ exports.createAssignment = async (req, res, next) => {
       dueDate,
       totalMarks,
       createdBy: req.user._id,
+      isPublished: isPublished === 'true' || isPublished === true || false, // Default to false if not provided
       // Add attachments if uploaded
       attachments: req.files
         ? req.files.map((file) => ({
@@ -363,6 +364,8 @@ exports.createAssignment = async (req, res, next) => {
           }))
         : [],
     });
+
+    console.log(`Created new assignment: ${assignment.title}, isPublished: ${assignment.isPublished}`);
 
     res.status(201).json({
       success: true,
@@ -787,6 +790,47 @@ exports.updateAssignment = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
+      data: assignment,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Publish assignment
+ * @route   PUT /api/faculty/assignments/:id/publish
+ * @access  Private (Faculty only)
+ */
+exports.publishAssignment = async (req, res, next) => {
+  try {
+    // Find assignment by ID
+    let assignment = await Assignment.findById(req.params.id);
+
+    if (!assignment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Assignment not found',
+      });
+    }
+
+    // Check if user is the creator of the assignment
+    if (assignment.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to publish this assignment',
+      });
+    }
+
+    // Update published status
+    assignment.isPublished = true;
+    await assignment.save();
+
+    console.log(`Assignment published: ${assignment.title}, ID: ${assignment._id}`);
+
+    res.status(200).json({
+      success: true,
+      message: 'Assignment published successfully',
       data: assignment,
     });
   } catch (error) {

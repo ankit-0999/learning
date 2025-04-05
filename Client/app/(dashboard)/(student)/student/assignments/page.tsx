@@ -224,6 +224,12 @@ export default function StudentAssignmentsPage() {
     ? assignments.filter(assignment => {
         const status = getSubmissionStatus(assignment);
         
+        // Log the assignment createdBy field for debugging
+        console.log('Assignment:', assignment.title, 'createdBy:', assignment.createdBy);
+        
+        // We don't need to filter out faculty assignments because the backend 
+        // already filters to show only assignments for courses the student is enrolled in
+        
         return (
           (statusFilter === 'all' || status === statusFilter) &&
           (assignment.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -231,6 +237,10 @@ export default function StudentAssignmentsPage() {
         );
       })
     : [];
+  
+  // Log filtered assignments count for debugging
+  console.log('Total assignments:', assignments.length);
+  console.log('Filtered assignments:', filteredAssignments.length);
   
   // Sort by due date (closest first)
   const sortedAssignments = [...filteredAssignments].sort((a, b) => {
@@ -392,6 +402,14 @@ export default function StudentAssignmentsPage() {
           <h3 className="mt-2 text-sm font-medium text-gray-900">No assignments found</h3>
           <p className="mt-1 text-sm text-gray-500">
             You don&apos;t have any assignments yet.
+          </p>
+        </Card>
+      ) : sortedAssignments.length === 0 ? (
+        <Card className="p-8 text-center">
+          <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400" />
+          <h3 className="mt-2 text-sm font-medium text-gray-900">No matching assignments</h3>
+          <p className="mt-1 text-sm text-gray-500">
+            No assignments match your current filters. Try adjusting your search or status filter.
           </p>
         </Card>
       ) : (

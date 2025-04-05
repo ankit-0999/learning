@@ -175,6 +175,7 @@ const apiService = {
         }
       });
     },
+    publishAssignment: (id: string) => api.put(`/api/faculty/assignments/${id}/publish`),
     deleteAssignment: (id: string) => api.delete(`/api/faculty/assignments/${id}`),
     gradeAssignment: (assignmentId: string, submissionId: string, gradeData: any) => 
       api.post(`/api/faculty/assignments/${assignmentId}/grade/${submissionId}`, gradeData),

@@ -12,6 +12,7 @@ const {
   getAssignmentSubmissions,
   gradeAssignment,
   deleteAssignment,
+  publishAssignment,
   createQuiz,
   getQuizSubmissions,
   sendNotification,
@@ -73,6 +74,9 @@ router.route('/assignments/:id')
   .get(idValidation, validate, getAssignmentById)
   .put(uploadMultiple('attachments'), updateAssignment)
   .delete(idValidation, validate, deleteAssignment);
+
+router.route('/assignments/:id/publish')
+  .put(idValidation, validate, publishAssignment);
 
 router.route('/assignments/:id/submissions')
   .get(idValidation, validate, getAssignmentSubmissions);
